@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>生成表情包</h1>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit">一键生成</button>
+</form>
+
+{% if meme_path %}
+<div class="result">
+    <h2>生成结果</h2>
+    <img src="{{ url_for('static', filename=meme_path) }}" alt="表情包">
+    <a href="{{ url_for('static', filename=meme_path) }}" download>保存图片</a>
+</div>
+{% endif %}
+{% endblock %}

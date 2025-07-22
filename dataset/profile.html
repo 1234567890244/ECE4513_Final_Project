@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>个人主页</h1>
+<div class="user-info">
+    <h2>{{ user.username }}</h2>
+    <p>注册时间: {{ user.register_date }}</p>
+</div>
+
+<div class="history">
+    <h2>历史表情包</h2>
+    <div class="meme-grid">
+        {% for meme in memes %}
+        <div class="meme-item">
+            <img src="{{ url_for('static', filename=meme.path) }}">
+            <p>{{ meme.create_time }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

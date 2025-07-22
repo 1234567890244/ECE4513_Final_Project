@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .content {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+        }
+
+        .panel {
+            flex: 1;
+            background: #f8f9fe;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .panel h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #e0e6f0;
+        }
+
+        .image-container {
+            flex: 1;
+            border: 2px dashed #a0aec0;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #718096;
+            padding: 20px;
+        }
+
+        .placeholder i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .btn-upload {
+            background: linear-gradient(90deg, #3498db 0%, #1d6fa5 100%);
+            color: white;
+        }
+
+        .btn-generate {
+            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .btn-download {
+            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(90deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            display: none;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background-color: #edf2f7;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .processing {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #4a5568;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(75, 108, 183, 0.2);
+            border-top: 5px solid #4b6cb7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-laugh-beam"></i> Meme Generator</h1>
+            <p class="subtitle">Upload images to automatically generate funny memes, download and share with one click</p>
+        </header>
+
+        <div class="content">
+            <div class="panel">
+                <h2>Upload Image</h2>
+                <div class="image-container" id="upload-container">
+                    <div class="placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click 'Upload Image' button or drag and drop images here</p>
+                        <p class="small">Supports JPG, PNG formats, maximum 5MB</p>
+                    </div>
+                    <img id="uploaded-image" alt="Uploaded Image">
+                </div>
+                <div class="buttons">
+                    <button class="btn btn-upload" id="upload-btn">
+                        <i class="fas fa-upload"></i> Upload Image
+                    </button>
+                    <button class="btn btn-reset" id="reset-btn" disabled>
+                        <i class="fas fa-redo"></i> Change Image
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Generated Result</h2>
+                <div class="image-container" id="result-container">
+                    <div class="placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>Generated memes will show here</p>
+                        <p class="small">Click the 'Start Generating' button to create your meme</p>
+                    </div>
+                    <img id="generated-image" alt="Generated Memes">
+                </div>
+
+                <div class="processing" id="processing">
+                    <div class="spinner"></div>
+                    <p>Generating memes, please wait...</p>
+                    <p>Analyzing face · Adding creative text · Generating meme</p>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-generate" id="generate-btn" disabled>
+                        <i class="fas fa-magic"></i> Start Generating
+                    </button>
+                    <button class="btn btn-download" id="download-btn" disabled>
+                        <i class="fas fa-download"></i> Download Image
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Meme Generator for Course ECE4513 - CUHKSZ</p>
+        </footer>
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadContainer = document.getElementById('upload-container');
+            const uploadedImage = document.getElementById('uploaded-image');
+            const generatedImage = document.getElementById('generated-image');
+            const resultContainer = document.getElementById('result-container');
+            const uploadBtn = document.getElementById('upload-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const generateBtn = document.getElementById('generate-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const processingDiv = document.getElementById('processing');
+            const fileInput = document.createElement('input');
+
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            let currentFile = null;
+            let processedImageUrl = null;
+
+            uploadBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    currentFile = this.files[0];
+
+                    if (!currentFile.type.match('image.*')) {
+                        alert('Please upload image file (JPG, PNG)');
+                        return;
+                    }
+
+                    if (currentFile.size > 5 * 1024 * 1024) {
+                        alert('Image size cannot exceed 5MB');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        uploadedImage.src = e.target.result;
+                        uploadedImage.style.display = 'block';
+                        uploadContainer.querySelector('.placeholder').style.display = 'none';
+
+                        resetBtn.disabled = false;
+                        generateBtn.disabled = false;
+
+                        generatedImage.style.display = 'none';
+                        resultContainer.querySelector('.placeholder').style.display = 'block';
+                        downloadBtn.disabled = true;
+                    }
+
+                    reader.readAsDataURL(currentFile);
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                fileInput.click();
+            });
+
+            uploadContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadContainer.style.borderColor = '#3498db';
+                uploadContainer.style.backgroundColor = '#f0f7ff';
+            });
+
+            uploadContainer.addEventListener('dragleave', () => {
+                uploadContainer.style.borderColor = '#a0aec0';
+                uploadContainer.style.backgroundColor = 'white';
+            });
+
+            uploadContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadContainer.style.borderColor = '#a0aec0';
+                uploadContainer.style.backgroundColor = 'white';
+
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    currentFile = e.dataTransfer.files[0];
+                    fileInput.files = e.dataTransfer.files;
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                }
+            });
+
+            generateBtn.addEventListener('click', () => {
+                if (!currentFile) return;
+
+                resultContainer.querySelector('.placeholder').style.display = 'none';
+                generatedImage.style.display = 'none';
+                processingDiv.style.display = 'block';
+                generateBtn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('image', currentFile);
+
+                fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    generatedImage.src = data.processed + '?' + new Date().getTime();
+                    generatedImage.style.display = 'block';
+                    processingDiv.style.display = 'none';
+                    downloadBtn.disabled = false;
+
+                    processedImageUrl = data.processed;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    processingDiv.style.display = 'none';
+                    resultContainer.querySelector('.placeholder').style.display = 'block';
+                    generateBtn.disabled = false;
+                    alert('Error: ' + error.message);
+                });
+            });
+
+            downloadBtn.addEventListener('click', () => {
+                if (!processedImageUrl) return;
+
+                const a = document.createElement('a');
+                a.href = processedImageUrl;
+                a.download = 'meme_' + new Date().getTime() + '.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        });
+    </script>
+</body>
+</html>
